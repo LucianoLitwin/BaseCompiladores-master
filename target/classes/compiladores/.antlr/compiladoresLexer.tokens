@@ -1,0 +1,15 @@
+PYC=1
+LLA=2
+LLC=3
+INT=4
+IGUAL=5
+DOUBLE=6
+ID=7
+NUMERO=8
+WS=9
+';'=1
+'{'=2
+'}'=3
+'int'=4
+'='=5
+'double'=6

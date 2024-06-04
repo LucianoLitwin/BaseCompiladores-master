@@ -1,11 +1,1 @@
-*~
-#*
-target
-.antlr
-__pycache__
-compiladores*.java
-compiladores*.py
-*.out
-*.class
-*.jar
-*.tokens
+
