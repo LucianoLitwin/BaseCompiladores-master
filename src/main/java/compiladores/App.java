@@ -1,9 +1,12 @@
 package compiladores;
 
 //import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.nio.file.Files;
@@ -15,7 +18,7 @@ import java.util.List;
 public class App {
     public static void main(String[] args) throws Exception {
         System.out.println("Hello, Compilador!!!");
-        String inputFile = "input/programa.txt";
+        String inputFile = "input/entrada.txt";
         String content = new String(Files.readAllBytes(Paths.get(inputFile)));
 
         compiladoresLexer lexer = new compiladoresLexer(CharStreams.fromString(content));
