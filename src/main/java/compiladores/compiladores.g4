@@ -88,10 +88,17 @@ condicion: (NOMBRE | NUMERO | llamadaFuncion) (COMPARE (NOMBRE | NUMERO | llamad
 
 llaves: LI instrucciones LD;
 
-declaracion: (STATIC | CONST)? (INT | FLOAT | DOUBLE | STRING) NOMBRE PYC
+// Modificación en la regla de declaración para permitir múltiples variables
+declaracion: (STATIC | CONST)? (INT | FLOAT | DOUBLE | STRING) listaVariables PYC
             | (STATIC | CONST)? (INT | FLOAT | DOUBLE | STRING) asignacion;
 
 asignacion: NOMBRE IGUAL expresion PYC;
+
+// Nueva regla para lista de variables
+listaVariables: variable (COMA variable)*;
+
+// Define una regla para una sola variable
+variable: NOMBRE (IGUAL expresion)?;
 
 if: IF PI condicion PD llaves (ELSE llaves)?;
 

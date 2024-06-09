@@ -8,6 +8,8 @@ int main() {
     double b;
     int i;
 
+    int v1,v2;
+
     a = 10;
     b = 20.5;
 
