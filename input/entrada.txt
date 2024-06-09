@@ -1,2 +1,25 @@
-probando 123 probando
-3 palabras
+#include <stdio.h>
+
+int main() {
+    int x = 10;
+    int y;
+    float z = 5.5;
+    
+    y = x + 5  // Falta punto y coma
+    printf("El valor de y es: %d\n", y);
+    
+    // Declaración con formato incorrecto
+    int w  // Falta punto y coma
+    
+    x = 15;
+    int x = 20;  // Doble declaración
+    
+    a = 10;  // Uso de un identificador no declarado
+    int b;
+    b = a + 5;  // Uso de un identificador sin inicializar
+    
+    char c = 'A';
+    int d = c + 5;  // Tipos de datos incompatibles
+    
+    return 0;
+}

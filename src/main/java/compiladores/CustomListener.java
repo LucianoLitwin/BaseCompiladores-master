@@ -1,9 +1,8 @@
 package compiladores;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +17,10 @@ public class CustomListener extends compiladoresBaseListener {
 
     public List<String> getErrors() {
         return errors;
+    }
+    
+    public SymbolTable getSymbolTable() {
+        return symbolTable;
     }
 
     @Override
