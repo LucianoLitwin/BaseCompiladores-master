@@ -1,6 +1,5 @@
 package compiladores;
 
-import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -72,6 +71,16 @@ public class App {
                 }
             } else {
                 System.out.println("No se encontraron errores semánticos.");
+            }
+
+            // Verificar y mostrar advertencias semánticas
+            customListener.checkUnusedSymbols();
+            List<String> warnings = customListener.getSemanticWarnings();
+            if (!warnings.isEmpty()) {
+                System.out.println("\nAdvertencias semánticas:");
+                for (String warning : warnings) {
+                    System.out.println(warning);
+                }
             }
 
         } catch (IOException e) {

@@ -35,7 +35,7 @@ WHILE: 'while';
 PRINT: 'print';
 CADENA: '"' (~["\\] | '\\' .)* '"';
 COMENTARIO: '//' .*? '\n' -> skip;
-COMENTARIO_MULTILINEA: '/' .? '*/' -> skip;
+COMENTARIO_MULTILINEA: '/*' .*? '*/' -> skip;
 RETURN: 'return';
 BREAK: 'break';
 
@@ -58,8 +58,7 @@ STRING: 'string';
 STATIC: 'static';
 CONST: 'const';
 
-
-NOMBRE: (LETRA | '')(LETRA | DIGITO | '')* ;
+NOMBRE: (LETRA | '_')(LETRA | DIGITO | '_')* ;
 NUMERO: (DIGITO+ | DIGITO+ PUNTO DIGITO+) ;
 
 // Start Rule
