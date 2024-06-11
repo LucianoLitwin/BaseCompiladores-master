@@ -32,7 +32,6 @@ FOR: 'for';
 WHILE: 'while';
 
 // Utiles
-PRINT: 'print';
 CADENA: '"' (~["\\] | '\\' .)* '"';
 COMENTARIO: '//' .*? '\n' -> skip;
 COMENTARIO_MULTILINEA: '/*' .*? '*/' -> skip;
@@ -53,10 +52,8 @@ VOID: 'void';
 DOUBLE: 'double';
 FLOAT: 'float';
 INT: 'int'; 
-LONG: 'long';
-STRING: 'string';
-STATIC: 'static';
-CONST: 'const';
+LONG: 'long'; 
+STRING: 'string'; 
 
 NOMBRE: (LETRA | '_')(LETRA | DIGITO | '_')* ;
 NUMERO: (DIGITO+ | DIGITO+ PUNTO DIGITO+) ;
@@ -64,20 +61,21 @@ NUMERO: (DIGITO+ | DIGITO+ PUNTO DIGITO+) ;
 // Start Rule
 programa: (declaracionFuncion | instrucciones) EOF;
 
+tipo: VOID |DOUBLE|FLOAT|INT|LONG|STRING;
+
 instrucciones: instruccion*;
 
 instruccion: llaves
             | declaracion
             | asignacion
-            | if
-            | for
-            | while
-            | switch
+            | myIf
+            | myFor
+            | myWhile
+            | mySwitch
             | declaracionFuncion
             | llamadaFuncion PYC
-            | print
-            | return
-            | break
+            | myReturn
+            | myBreak
             | comentario
             ;
 
@@ -88,45 +86,47 @@ condicion: (NOMBRE | NUMERO | llamadaFuncion) (COMPARE (NOMBRE | NUMERO | llamad
 llaves: LI instrucciones LD;
 
 // Modificación en la regla de declaración para permitir múltiples variables
-declaracion: (STATIC | CONST)? (INT | FLOAT | DOUBLE | STRING) listaVariables PYC
-            | (STATIC | CONST)? (INT | FLOAT | DOUBLE | STRING) asignacion;
+declaracion:  tipo NOMBRE declaracion_continua PYC
+            |  tipo asignacion declaracion_continua
+            ;
 
-asignacion: NOMBRE IGUAL expresion PYC;
+declaracion_continua: COMA tipo NOMBRE declaracion_continua
+                    |
+                    ;
 
-// Nueva regla para lista de variables
-listaVariables: variable (COMA variable)*;
+asignacion: NOMBRE IGUAL (expresion | NUMERO) PYC;
 
-// Define una regla para una sola variable
-variable: NOMBRE (IGUAL expresion)?;
 
-if: IF PI condicion PD llaves (ELSE llaves)?;
+myIf: IF PI condicion PD llaves (ELSE llaves)?;
 
 expresionFor: INT asignacion condicion PYC NOMBRE ACUM;
 
-for: FOR PI expresionFor PD llaves;
+myFor: FOR PI expresionFor PD llaves;
 
-while: WHILE PI condicion PD llaves;
+myWhile: WHILE PI condicion PD llaves;
 
-switch: SWITCH PI expresion PD bloqueSwitch;
+mySwitch: SWITCH PI expresion PD bloqueSwitch;
 
-bloqueSwitch: LI (case)* default? LD;
+bloqueSwitch: LI myCase LD;
 
-case: CASE expresion DOSPUNTOS instrucciones;
+myCase: CASE expresion DOSPUNTOS instrucciones myCase
+      | default
+      | 
+      ;
 
-break: BREAK PYC;
+myBreak: BREAK PYC;
 
 default: DEFAULT DOSPUNTOS instrucciones;
 
-print: PRINT PI CADENA (COMA argumentos)? PD PYC;
 
 llamadaFuncion: NOMBRE PI argumentos? PD;
 
 argumentos: expresion (COMA expresion)*;
 
-declaracionFuncion: (STATIC | CONST)? (INT | DOUBLE | FLOAT | VOID | STRING) NOMBRE PI parametros? PD llaves;
+declaracionFuncion: tipo NOMBRE PI parametros? PD llaves;
 
-parametros: (INT | DOUBLE | FLOAT) NOMBRE (COMA (INT | DOUBLE | FLOAT) NOMBRE)*;
+parametros: tipo NOMBRE (COMA tipo NOMBRE)*;
 
-return: RETURN (expresion | NUMERO)? PYC;
+myReturn: RETURN (expresion | NUMERO)? PYC;
 
 comentario: (COMENTARIO | COMENTARIO_MULTILINEA);
