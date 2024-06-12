@@ -32,10 +32,7 @@ FOR: 'for';
 WHILE: 'while';
 
 // Utiles
-PRINT: 'print';
 CADENA: '"' (~["\\] | '\\' .)* '"';
-COMENTARIO: '//' .*? '\n' -> skip;
-COMENTARIO_MULTILINEA: '/*' .*? '*/' -> skip;
 RETURN: 'return';
 BREAK: 'break';
 
@@ -53,10 +50,7 @@ VOID: 'void';
 DOUBLE: 'double';
 FLOAT: 'float';
 INT: 'int'; 
-LONG: 'long';
-STRING: 'string';
-STATIC: 'static';
-CONST: 'const';
+STRING: 'string'; 
 
 NOMBRE: (LETRA | '_')(LETRA | DIGITO | '_')* ;
 NUMERO: (DIGITO+ | DIGITO+ PUNTO DIGITO+) ;
@@ -64,21 +58,21 @@ NUMERO: (DIGITO+ | DIGITO+ PUNTO DIGITO+) ;
 // Start Rule
 programa: (declaracionFuncion | instrucciones) EOF;
 
+tipo: VOID |DOUBLE|FLOAT|INT|STRING;
+
 instrucciones: instruccion*;
 
 instruccion: llaves
             | declaracion
             | asignacion
-            | if
-            | for
-            | while
-            | switch
+            | myIf
+            | myFor
+            | myWhile
+            | mySwitch
             | declaracionFuncion
             | llamadaFuncion PYC
-            | print
-            | return
-            | break
-            | comentario
+            | myReturn
+            | myBreak
             ;
 
 expresion: (NOMBRE | NUMERO | llamadaFuncion) ((MAS | MENOS | MULTI | DIVI | ANDOR) (NOMBRE | NUMERO | llamadaFuncion))*;
@@ -88,45 +82,55 @@ condicion: (NOMBRE | NUMERO | llamadaFuncion) (COMPARE (NOMBRE | NUMERO | llamad
 llaves: LI instrucciones LD;
 
 // Modificación en la regla de declaración para permitir múltiples variables
-declaracion: (STATIC | CONST)? (INT | FLOAT | DOUBLE | STRING) listaVariables PYC
-            | (STATIC | CONST)? (INT | FLOAT | DOUBLE | STRING) asignacion;
+declaracion:  tipo NOMBRE declaracion_continua PYC
+            |  tipo asignacion declaracion_continua
+            ;
 
-asignacion: NOMBRE IGUAL expresion PYC;
+declaracion_continua: COMA NOMBRE declaracion_continua
+                    |
+                    ;
 
-// Nueva regla para lista de variables
-listaVariables: variable (COMA variable)*;
+asignacion: NOMBRE IGUAL (expresion | NUMERO) PYC;
 
-// Define una regla para una sola variable
-variable: NOMBRE (IGUAL expresion)?;
 
-if: IF PI condicion PD llaves (ELSE llaves)?;
+myIf: IF PI condicion PD llaves (ELSE llaves)?;
 
 expresionFor: INT asignacion condicion PYC NOMBRE ACUM;
 
-for: FOR PI expresionFor PD llaves;
+myFor: FOR PI expresionFor PD llaves;
 
-while: WHILE PI condicion PD llaves;
+myWhile: WHILE PI condicion PD llaves;
 
-switch: SWITCH PI expresion PD bloqueSwitch;
+mySwitch: SWITCH PI expresion PD bloqueSwitch;
 
-bloqueSwitch: LI (case)* default? LD;
+bloqueSwitch: LI myCase LD;
 
-case: CASE expresion DOSPUNTOS instrucciones;
+myCase: CASE expresion DOSPUNTOS instrucciones myCase
+      | default
+      | 
+      ;
 
-break: BREAK PYC;
+myBreak: BREAK PYC;
 
 default: DEFAULT DOSPUNTOS instrucciones;
 
-print: PRINT PI CADENA (COMA argumentos)? PD PYC;
 
 llamadaFuncion: NOMBRE PI argumentos? PD;
 
-argumentos: expresion (COMA expresion)*;
+argumentos: expresion argumentos_continuos;
 
-declaracionFuncion: (STATIC | CONST)? (INT | DOUBLE | FLOAT | VOID | STRING) NOMBRE PI parametros? PD llaves;
+argumentos_continuos: COMA expresion argumentos_continuos
+                    |
+                    ;
 
-parametros: (INT | DOUBLE | FLOAT) NOMBRE (COMA (INT | DOUBLE | FLOAT) NOMBRE)*;
+declaracionFuncion: tipo NOMBRE PI parametros? PD llaves;
 
-return: RETURN (expresion | NUMERO)? PYC;
+parametros: tipo NOMBRE parametros_continuos;
 
-comentario: (COMENTARIO | COMENTARIO_MULTILINEA);
+parametros_continuos: COMA tipo NOMBRE parametros_continuos
+                    |
+                    ;
+
+
+myReturn: RETURN (expresion | NUMERO)? PYC;
+

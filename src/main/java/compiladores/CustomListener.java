@@ -3,96 +3,77 @@ package compiladores;
 import org.antlr.v4.runtime.tree.ErrorNode;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-/*syntaxErrors para los errores sintácticos, 
-semanticErrors para los errores semánticos 
-semanticWarnings para las advertencias semánticas. */
 
 public class CustomListener extends compiladoresBaseListener {
-    private SymbolTable symbolTable;
-    private List<String> errors;
-    private List<String> semanticWarnings; // Added field for semantic warnings
+    private SymbolTable symbolTable;  // Tabla de símbolos para almacenar identificadores
+    private List<String> errors;      // Lista de errores sintácticos y semánticos
+    private List<String> semanticWarnings; // Lista de advertencias semánticas
 
     public CustomListener() {
-        symbolTable = new SymbolTable();
-        errors = new ArrayList<>();
-        semanticWarnings = new ArrayList<>(); // Initialize semanticWarnings list
+        symbolTable = new SymbolTable();  // Inicialización de la tabla de símbolos
+        errors = new ArrayList<>();       // Inicialización de la lista de errores
+        semanticWarnings = new ArrayList<>(); // Inicialización de la lista de advertencias semánticas
     }
 
     public List<String> getErrors() {
-        return errors;
+        return errors;  // Devuelve la lista de errores sintácticos y semánticos
     }
 
     public List<String> getSemanticWarnings() {
-        return semanticWarnings;
+        return semanticWarnings;  // Devuelve la lista de advertencias semánticas
     }
 
     public SymbolTable getSymbolTable() {
-        return symbolTable;
+        return symbolTable;  // Devuelve la tabla de símbolos completa
     }
 
     @Override
     public void enterDeclaracion(compiladoresParser.DeclaracionContext ctx) {
-        String type = ctx.getChild(0).getText();
-        String name = ctx.getChild(1).getText();
-        boolean initialized = ctx.getChild(2).getText().equals("=");
+        // Método invocado al entrar a una declaración de variable
+        String type = ctx.getChild(0).getText();  // Obtiene el tipo de la variable
+        String name = ctx.getChild(1).getText();  // Obtiene el nombre de la variable
+        boolean initialized = ctx.getChildCount() > 2 && ctx.getChild(2).getText().equals("=");  // Verifica si está inicializada
 
         try {
-            symbolTable.addSymbol(name, type, initialized);
+            symbolTable.addSymbol(name, type, initialized);  // Agrega el símbolo a la tabla de símbolos
         } catch (Exception e) {
-            errors.add(e.getMessage());
+            errors.add(e.getMessage());  // Captura y agrega mensajes de error a la lista de errores
         }
     }
 
     @Override
     public void enterAsignacion(compiladoresParser.AsignacionContext ctx) {
-        String name = ctx.getChild(0).getText();
+        // Método invocado al entrar a una asignación de variable
+        String name = ctx.getChild(0).getText();  // Obtiene el nombre de la variable a asignar
 
         try {
             if (!symbolTable.isDeclared(name)) {
                 errors.add("Error semántico: Uso de un identificador no declarado " + name);
+                // Agrega un error si se intenta usar un identificador no declarado
             } else {
-                symbolTable.initializeSymbol(name);
+                symbolTable.initializeSymbol(name);  // Inicializa el símbolo en la tabla de símbolos
             }
         } catch (Exception e) {
-            errors.add(e.getMessage());
+            errors.add(e.getMessage());  // Captura y agrega mensajes de error a la lista de errores
         }
     }
 
-    // Method to check unused symbols
-    // Updated checkUnusedSymbols() method
-public void checkUnusedSymbols() {
-    Set<String> usedSymbols = new HashSet<>();
+    // Método para verificar símbolos no utilizados
+    public void checkUnusedSymbols() {
 
-    // Check usage in main() function
-    usedSymbols.add("main");
-
-    // Check usage in testFunction() or other defined functions
-    // Example for testFunction
-    if (symbolTable.isDeclared("testFunction")) {
-        usedSymbols.add("testFunction");
-    }
-
-    // Check usage in main code block (assumed to be in main function context)
-    for (String name : symbolTable.getSymbols().keySet()) {
-        if (name.equals("a") || name.equals("b") || name.equals("i")) {
-            usedSymbols.add(name);
+        // Verifica el bloque principal de código (asume que está en el contexto de la función 'main')
+        // Marca como utilizados todos los identificadores declarados en la tabla de símbolos
+        for (String name : symbolTable.getSymbols().keySet()) {
+            Symbol symbol = symbolTable.getSymbols().get(name);
+            if (!symbol.isInitialized()) {
+                semanticWarnings.add("Advertencia semántica: Identificador declarado pero no usado: " + name);
+            }
         }
     }
-
-    // Check if declared symbols are used
-    for (String name : symbolTable.getSymbols().keySet()) {
-        if (!usedSymbols.contains(name) && !name.equals("main") && !name.equals("testFunction")) {
-            semanticWarnings.add("Advertencia semántica: Identificador declarado pero no usado: " + name);
-        }
-    }
-}
 
     @Override
     public void visitErrorNode(ErrorNode node) {
-        errors.add("Error sintáctico en: " + node.getText());
+        errors.add("Error sintáctico en: " + node.getText());  // Agrega errores sintácticos encontrados
     }
 }
