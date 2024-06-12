@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 int testFunction() {
-=======
-void testFunction() {
->>>>>>> dae4dd0e7b6f74f9d7c5d179be799f729b344410
     int x;
     x=x+1;
     return x;
