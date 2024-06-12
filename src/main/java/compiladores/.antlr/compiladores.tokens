@@ -16,6 +16,7 @@ DEFAULT=15
 FOR=16
 WHILE=17
 CADENA=18
+<<<<<<< HEAD
 RETURN=19
 BREAK=20
 MAS=21
@@ -32,6 +33,27 @@ INT=31
 STRING=32
 NOMBRE=33
 NUMERO=34
+=======
+COMENTARIO=19
+COMENTARIO_MULTILINEA=20
+RETURN=21
+BREAK=22
+MAS=23
+MENOS=24
+MULTI=25
+DIVI=26
+ACUM=27
+IGUAL=28
+ANDOR=29
+VOID=30
+DOUBLE=31
+FLOAT=32
+INT=33
+LONG=34
+STRING=35
+NOMBRE=36
+NUMERO=37
+>>>>>>> dae4dd0e7b6f74f9d7c5d179be799f729b344410
 '('=2
 ')'=3
 '{'=4
@@ -47,6 +69,7 @@ NUMERO=34
 'default'=15
 'for'=16
 'while'=17
+<<<<<<< HEAD
 'return'=19
 'break'=20
 '+'=21
@@ -59,3 +82,18 @@ NUMERO=34
 'float'=30
 'int'=31
 'string'=32
+=======
+'return'=21
+'break'=22
+'+'=23
+'-'=24
+'*'=25
+'/'=26
+'='=28
+'void'=30
+'double'=31
+'float'=32
+'int'=33
+'long'=34
+'string'=35
+>>>>>>> dae4dd0e7b6f74f9d7c5d179be799f729b344410
