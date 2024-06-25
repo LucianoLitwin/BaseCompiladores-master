@@ -1,8 +1,8 @@
 grammar compiladores;
 
-@header {
+/*@header {
 package compiladores;
-}
+}*/
 
 fragment LETRA : [A-Za-z] ;
 fragment DIGITO : [0-9] ;
@@ -10,7 +10,7 @@ fragment DIGITO : [0-9] ;
 WS: [ \t\r\n]+ -> skip;
 
 // Simbolos
-PI: '(';
+PI: '('; 
 PD: ')';
 LI: '{';
 LD: '}';
@@ -32,7 +32,6 @@ FOR: 'for';
 WHILE: 'while';
 
 // Utiles
-CADENA: '"' (~["\\] | '\\' .)* '"';
 RETURN: 'return';
 BREAK: 'break';
 
@@ -55,43 +54,47 @@ STRING: 'string';
 NOMBRE: (LETRA | '_')(LETRA | DIGITO | '_')* ;
 NUMERO: (DIGITO+ | DIGITO+ PUNTO DIGITO+) ;
 
-// Start Rule
-programa: (declaracionFuncion | instrucciones) EOF;
+
+programa: instrucciones EOF;
 
 tipo: VOID |DOUBLE|FLOAT|INT|STRING;
 
-instrucciones: instruccion*;
+instrucciones: instruccion instrucciones
+             |
+             ;
 
 instruccion: llaves
-            | declaracion
-            | asignacion
+            | declaracion PYC
+            | asignacion PYC
             | myIf
             | myFor
             | myWhile
-            | mySwitch
             | declaracionFuncion
-            | llamadaFuncion PYC
+            | llamadaFuncion
             | myReturn
             | myBreak
             ;
 
-expresion: (NOMBRE | NUMERO | llamadaFuncion) ((MAS | MENOS | MULTI | DIVI | ANDOR) (NOMBRE | NUMERO | llamadaFuncion))*;
+expresion: (NOMBRE | NUMERO | llamadaFuncion) expresion_continua;
+
+expresion_continua: ((MAS | MENOS | MULTI | DIVI | ANDOR) (NOMBRE | NUMERO | llamadaFuncion))*
+                  |
+                  ;
 
 condicion: (NOMBRE | NUMERO | llamadaFuncion) (COMPARE (NOMBRE | NUMERO | llamadaFuncion))*;
 
 llaves: LI instrucciones LD;
 
 // Modificación en la regla de declaración para permitir múltiples variables
-declaracion:  tipo NOMBRE declaracion_continua PYC
-            |  tipo asignacion declaracion_continua
+declaracion:  tipo NOMBRE
+            |  tipo asignacion
             ;
 
 declaracion_continua: COMA NOMBRE declaracion_continua
                     |
                     ;
 
-asignacion: NOMBRE IGUAL (expresion | NUMERO) PYC;
-
+asignacion: NOMBRE IGUAL expresion;
 
 myIf: IF PI condicion PD llaves (ELSE llaves)?;
 
@@ -114,16 +117,15 @@ myBreak: BREAK PYC;
 
 default: DEFAULT DOSPUNTOS instrucciones;
 
+declaracionFuncion: tipo NOMBRE PI parametros? PD llaves;
 
-llamadaFuncion: NOMBRE PI argumentos? PD;
+llamadaFuncion: NOMBRE PI argumentos? PD PYC;
 
 argumentos: expresion argumentos_continuos;
 
 argumentos_continuos: COMA expresion argumentos_continuos
                     |
                     ;
-
-declaracionFuncion: tipo NOMBRE PI parametros? PD llaves;
 
 parametros: tipo NOMBRE parametros_continuos;
 

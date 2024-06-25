@@ -9,3 +9,7 @@ compiladores*.py
 *.class
 *.jar
 *.tokens
+.idea/
+*.iws
+*.iml
+.ipr
