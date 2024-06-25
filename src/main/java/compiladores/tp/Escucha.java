@@ -11,6 +11,7 @@ public class Escucha extends compiladoresBaseListener {
 
     private List<String> errors;      // Lista de errores sintácticos y semánticos
     private List<String> semanticWarnings; // Lista de advertencias semánticas
+    private int permitoAsignar = 0;
 
     public Escucha() {
         symbolTable = new SymbolTable();  // Inicialización de la tabla de símbolos
@@ -43,105 +44,112 @@ public class Escucha extends compiladoresBaseListener {
 
     @Override
     public void exitDeclaracion(compiladoresParser.DeclaracionContext ctx) {
+        Type type = Type.valueOf(ctx.tipo().getText().toUpperCase());
+        String name = null;
 
-        Type type = null;
-        String name;
-        if(ctx.NOMBRE()!=null){
-            // Método invocado al entrar a una declaración de variable
-            type = Type.valueOf(ctx.tipo().getText().toUpperCase());  // Obtiene el tipo de la variable
-            name = ctx.NOMBRE().getText();  // Obtiene el nombre de la variable no esta inicializado
-        }else{
-            // Método invocado al entrar a una declaración de variable
-            type = Type.valueOf(ctx.tipo().getText().toUpperCase());  // Obtiene el tipo de la variable
-            name = ctx.asignacion().NOMBRE().getText();  // Obtiene el nombre en base a asignacion porque significa que se inicializo
-
+        if (ctx.NOMBRE() != null) {
+            name = ctx.NOMBRE().getText();
+        } else if (ctx.asignacion() != null && ctx.asignacion().NOMBRE() != null) {
+            name = ctx.asignacion().NOMBRE().getText();
+            permitoAsignar = 1; // Marcar para permitir asignación en esta declaración
         }
-        Symbol symbol= new Symbol(name,type);
-        if(symbolTable.buscarSymbol(symbol)== null) {
-            try {
-                symbolTable.addSymbol(symbol);  // Agrega el símbolo a la tabla de símbolos
-            } catch (Exception e) {
-                errors.add(e.getMessage());  // Captura y agrega mensajes de error a la lista de errores
+
+        if (name != null) {
+            Symbol symbol = new Symbol(name, type);
+
+            if (symbolTable.buscarSymbol(symbol) == null) {
+                symbolTable.addSymbol(symbol);
+
+                if (ctx.asignacion() != null) {
+                    permitoAsignar = 2; // Marcar que se está realizando la asignación
+                    exitAsignacion(ctx.asignacion());
+                }
+            } else {
+                String errorMsg = "Error de semántica: La variable " + name + " ya ha sido declarada.";
+                errors.add(errorMsg);
+                //System.out.println(errorMsg);
             }
-        }else{
-            System.out.println("Variable declarada dos veces");
         }
-
-
     }
+
 
     @Override
     public void exitAsignacion(compiladoresParser.AsignacionContext ctx) {
-
-
-        // Método invocado al entrar a una asignación de variable
-        if(ctx.NOMBRE()!=null) {
-            String name = ctx.NOMBRE().getText();  // Obtiene el nombre de la variable
+        if (permitoAsignar == 1 || permitoAsignar == 2) {
+            // Permitir asignación porque hubo declaración previa
+            String name = ctx.NOMBRE().getText();
             Type type = symbolTable.getTypeByName(name);
-
 
             if (type != null) {
                 Symbol symbol = new Symbol(name, type);
                 try {
                     if (symbolTable.buscarSymbol(symbol) != null) {
-                        symbolTable.initializeSymbol(symbol);  // Inicializa el símbolo en la tabla de símbolos
+                        symbolTable.initializeSymbol(symbol);
                     } else {
-                        errors.add("Error semántico: Uso de un identificador no declarado " + name);
-                        // Agrega un error si se intenta usar un identificador no declarado
+                        errors.add("Error de semántica: Uso de un identificador no declarado " + name);
                     }
                 } catch (Exception e) {
-                    errors.add(e.getMessage());  // Captura y agrega mensajes de error a la lista de errores
+                    errors.add(e.getMessage());
                 }
+            } else {
+                errors.add("Error de semántica: Uso de un identificador no declarado " + name);
             }
         }
     }
 
     @Override
     public void exitMyIf(compiladoresParser.MyIfContext ctx){
+        //System.out.println("Exit If ctx: " + ctx.getText());
         if(ctx.condicion().NOMBRE() != null) {
             String name = ctx.condicion().NOMBRE().toString();
             Type type = symbolTable.getTypeByName(name);
             Symbol symbol = new Symbol(name, type);
 
             if(symbolTable.buscarSymbol(symbol) == null) {
-                System.out.println("Comparando una variable inexistente");
+                errors.add("Error de semántica en IF: Comparando una variable inexistente");
             }else if(!symbolTable.buscarSymbol(symbol).isInitialized()){
-                System.out.println("Comparando una variable no inicializada");
+                errors.add("Error de semántica en IF: Comparando una variable no inicializada");
             }else{
                 symbolTable.usedSymbol(symbol);
             }
         }
 
-        if(ctx.PI()==null){
-            errors.add("Error sintáctico, no hay parantesis de apertura en el if. ");
-        }
-
-        if(ctx.PD()==null){
-            errors.add("Error sintáctico, no hay parantesis de cierre en el if. ");
-        }
     }
 
     @Override
     public void exitMyFor(compiladoresParser.MyForContext ctx){
-        if(ctx.PI()==null){
-            errors.add("Error sintáctico, no hay parantesis de apertura en el for. ");
-        }
+        if(ctx.expresionFor().condicion().NOMBRE() != null) {
+            String name = ctx.expresionFor().condicion().NOMBRE().toString();
+            Type type = symbolTable.getTypeByName(name);
+            Symbol symbol = new Symbol(name, type);
 
-        if(ctx.PD()==null){
-            errors.add("Error sintáctico, no hay parantesis de cierre en el for. ");
+            if(symbolTable.buscarSymbol(symbol) == null) {
+                errors.add("Error de semántica en FOR: Comparando una variable inexistente");
+            }else if(!symbolTable.buscarSymbol(symbol).isInitialized()){
+                errors.add("Error de semántica en FOR: Comparando una variable no inicializada");
+            }else{
+                symbolTable.usedSymbol(symbol);
+            }
         }
     }
 
     @Override
     public void exitMyWhile(compiladoresParser.MyWhileContext ctx){
-        if(ctx.PI()==null){
-            errors.add("Error sintáctico, no hay parantesis de apertura en el while. ");
-        }
+        if(ctx.condicion().NOMBRE() != null) {
+            String name = ctx.condicion().NOMBRE().toString();
+            Type type = symbolTable.getTypeByName(name);
+            Symbol symbol = new Symbol(name, type);
 
-        if(ctx.PD()==null){
-            errors.add("Error sintáctico, no hay parantesis de cierre en el while. ");
+            if(symbolTable.buscarSymbol(symbol) == null) {
+                errors.add("Error de semántica en WHILE: Comparando una variable inexistente");
+            }else if(!symbolTable.buscarSymbol(symbol).isInitialized()){
+                errors.add("Error de semántica en WHILE: Comparando una variable no inicializada");
+            }else{
+                symbolTable.usedSymbol(symbol);
+            }
         }
     }
+
 
     @Override
     public void exitPrograma(compiladoresParser.ProgramaContext ctx) {
@@ -152,11 +160,28 @@ public class Escucha extends compiladoresBaseListener {
 
         // Verificar si han sido utilizados
         for (Symbol symbol : allIdentificadores) {
+            System.out.println("Name id: " + symbol.getName());
+
             if (!symbol.isUsed()) {
-                System.out.println("Warning semántico: El identificador " + symbol.getName() + " de tipo " + symbol.getType() + " ha sido declarado pero no utilizado.");
+                System.out.println("Advertencia semántica: El identificador " + symbol.getName() + " de tipo " + symbol.getType() + " ha sido declarado pero no utilizado.");
+                semanticWarnings.add("Advertencia semántica: El identificador " + symbol.getName() + " de tipo " + symbol.getType() + " ha sido declarado pero no utilizado.");
             }
         }
 
+
+        if(errors.toArray().length>0){
+            System.out.println("\nErrores de Semántica:");
+            for (String error : errors) {
+                System.out.println("-" + error);
+            }
+        }
+
+        if(semanticWarnings.toArray().length>0){
+            System.out.println("WARNINGS");
+            for (String warning : semanticWarnings) {
+                System.out.println("-" + warning);
+            }
+        }
         symbolTable.delContexto();
     }
 

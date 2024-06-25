@@ -23,15 +23,9 @@ class Contexto {
         return null;
     }
 
-    public Symbol buscarNameSymbol(String name){
-        for (Symbol symbol : symbols.values()) {
-            if(symbol.getName().equals(name)){
-                return symbol;
-            }
-        }
-        return null;
+    public Symbol buscarNameSymbol(String name) {
+        return symbols.get(name);
     }
-
 
 
     public Map<String, Symbol> getSymbol() {

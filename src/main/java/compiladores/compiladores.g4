@@ -70,7 +70,7 @@ instruccion: llaves
             | myFor
             | myWhile
             | declaracionFuncion
-            | llamadaFuncion
+            | llamadaFuncion PYC
             | myReturn
             | myBreak
             ;
@@ -98,7 +98,7 @@ asignacion: NOMBRE IGUAL expresion;
 
 myIf: IF PI condicion PD llaves (ELSE llaves)?;
 
-expresionFor: INT asignacion condicion PYC NOMBRE ACUM;
+expresionFor: asignacion PYC condicion PYC NOMBRE ACUM;
 
 myFor: FOR PI expresionFor PD llaves;
 
@@ -119,7 +119,7 @@ default: DEFAULT DOSPUNTOS instrucciones;
 
 declaracionFuncion: tipo NOMBRE PI parametros? PD llaves;
 
-llamadaFuncion: NOMBRE PI argumentos? PD PYC;
+llamadaFuncion: NOMBRE PI argumentos? PD;
 
 argumentos: expresion argumentos_continuos;
 
