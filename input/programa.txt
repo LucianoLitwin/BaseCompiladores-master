@@ -1,11 +1,10 @@
 int testFunction() {
     int x=1;
-    x=x+1;
+    x=11;
     return x;
 }
 
 int main() {
-
 
     int doble;
     int doble;
@@ -25,7 +24,13 @@ int main() {
 
     int a;
     double b;
-    int i;
+
+
+    int igna;
+    int lucho;
+
+    igna=555;
+    lucho=112;
 
     a = 10;
     b = 20.5;
@@ -33,18 +38,19 @@ int main() {
     a = a + 5;
     b = b / 2;
 
-    if (a < 15)
+    if (l < 15)
         a = a + 5;
 
     } else {
         a = a - 5
     }
 
-    for (i = 0; i < 5; i++) {
+
+    for (i = 0; o < 5; i++) {
         a = a + i;
     }
 
-    while a > 0) {
+    while q > 0) {
         a = a - 1;
     }
 

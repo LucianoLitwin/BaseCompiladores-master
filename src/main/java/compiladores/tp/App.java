@@ -6,12 +6,13 @@ import org.antlr.v4.runtime.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class App {
     public static void main(String[] args) {
         try {
             // Cargar el archivo de entrada
-            System.out.println("Hola Profe! :)");
+            System.out.println("\nHola Profe! :)\n");
             String inputFile = "input/programa.txt";
             String content = new String(Files.readAllBytes(Paths.get(inputFile)));
             
@@ -28,7 +29,7 @@ public class App {
             parser.addErrorListener(new BaseErrorListener() {
                 @Override
                 public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-                    String errorMsg = "Línea " + line + ":" + charPositionInLine + " " + msg;
+                    String errorMsg = msg;
                     String detailedMsg;
 
                     switch (tipoError(msg)) {
@@ -40,6 +41,9 @@ public class App {
                             break;
                         case ";":
                             detailedMsg = "Error de sintaxis: Se esperaba un punto y coma.";
+                            break;
+                        case "{":
+                            detailedMsg = "Error de sintaxis: Se esperaba una llave de apertura.";
                             break;
                         case "}":
                             detailedMsg = "Error de sintaxis: Se esperaba una llave de cierre.";
@@ -62,6 +66,8 @@ public class App {
                         return "(";
                     } else if (msg.contains("';'")) {
                         return ";";
+                    } else if (msg.contains("'{'")) {
+                        return "{";
                     } else if (msg.contains("'}'")) {
                         return "}";
                     } else if (msg.contains("no viable alternative at input")) {
@@ -70,14 +76,7 @@ public class App {
                     return "nada";
                 }
             });
-
-
-
-            // Solicito al parser que comience indicando una regla gramatical
-            // En este caso la regla es el simbolo inicial
             parser.programa();
-
-
 
         } catch (IOException e) {
             e.printStackTrace();

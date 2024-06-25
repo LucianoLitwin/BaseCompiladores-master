@@ -51,12 +51,11 @@ public class SymbolTable {
         }
     }
 
-    public Type getTypeByName(String name){
-        Symbol symbol = new Symbol(name, null);
-        for (int i = contextos.size() - 1; i >=0 ; i--) {
-            Symbol symbol1 = contextos.get(i).buscarSymbol(symbol);
-            if (symbol1 != null) {
-                return symbol1.getType();
+    public Type getTypeByName(String name) {
+        for (int i = contextos.size() - 1; i >= 0; i--) {
+            Symbol symbol = contextos.get(i).buscarNameSymbol(name);
+            if (symbol != null) {
+                return symbol.getType();
             }
         }
         return null;
