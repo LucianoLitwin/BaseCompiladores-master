@@ -150,6 +150,13 @@ public class Escucha extends compiladoresBaseListener {
         }
     }
 
+    /*@Override
+    public void exitExpresionAritmetica(compiladoresParser.ExpresionAritmeticaContext ctx) {
+        // Ejemplo de verificación de división por cero
+        if (ctx.operador.getText().equals("/") && ctx.right.getText().equals("0")) {
+            errors.add("Error aritmético: División por cero en la línea " + ctx.start.getLine());
+        }
+    }*/
 
     @Override
     public void exitPrograma(compiladoresParser.ProgramaContext ctx) {
@@ -184,7 +191,6 @@ public class Escucha extends compiladoresBaseListener {
         }
         symbolTable.delContexto();
     }
-
 
 
 
