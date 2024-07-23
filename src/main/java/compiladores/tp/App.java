@@ -51,6 +51,9 @@ public class App {
                         case "otro":
                             detailedMsg = "Error de sintaxis: Entrada no reconocida " + recognizer.getVocabulary().getDisplayName(((Token) offendingSymbol).getType());
                             break;
+                        case "/0":
+                            detailedMsg = "Error aritmético: División por cero en la línea " + line;
+                            break;
                         default:
                             detailedMsg = errorMsg;
                             break;

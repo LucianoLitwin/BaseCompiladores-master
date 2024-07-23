@@ -23,6 +23,7 @@ DOSPUNTOS: ':';
 IF: 'if';
 ELSE: 'else';
 COMPARE: ('<' | '<=' | '>' | '>=' | '==' | '!=');
+
 SWITCH: 'switch';
 CASE: 'case';
 DEFAULT: 'default';
@@ -75,11 +76,21 @@ instruccion: llaves
             | myBreak
             ;
 
-expresion: (NOMBRE | NUMERO | llamadaFuncion) expresion_continua;
+//expresion: (NOMBRE | NUMERO | llamadaFuncion) expresion_continua;
 
-expresion_continua: ((MAS | MENOS | MULTI | DIVI | ANDOR) (NOMBRE | NUMERO | llamadaFuncion))*
-                  |
-                  ;
+//expresion_continua: ((MAS | MENOS | MULTI | DIVI | ANDOR) (NOMBRE | NUMERO | llamadaFuncion))*
+//                  |
+//                  ;
+
+expresion: termino ((MAS | MENOS) termino)* ;
+
+termino: factor ((MULTI | DIVI) factor)* ;
+
+factor: NOMBRE
+      | NUMERO
+      | llamadaFuncion
+      | PI expresion PD
+      ;
 
 condicion: (NOMBRE | NUMERO | llamadaFuncion) (COMPARE (NOMBRE | NUMERO | llamadaFuncion))*;
 
