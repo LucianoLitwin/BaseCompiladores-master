@@ -7,82 +7,33 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 
 public class App {
-    public static void main(String[] args) {
-        try {
-            // Cargar el archivo de entrada
-            System.out.println("\nHola Profe! :)\n");
-            String inputFile = "input/programa.txt";
-            String content = new String(Files.readAllBytes(Paths.get(inputFile)));
-            
-            // Crear el lexer y el parser
-            compiladoresLexer lexer = new compiladoresLexer(CharStreams.fromString(content));
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            compiladoresParser parser = new compiladoresParser(tokens);
+    public static void main(String[] args) throws Exception {
 
-            Escucha escucha = new Escucha();
-            parser.addParseListener(escucha);
-            
-            // Añadir un listener para errores sintácticos
-            parser.removeErrorListeners();
-            parser.addErrorListener(new BaseErrorListener() {
-                @Override
-                public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-                    String errorMsg = msg;
-                    String detailedMsg;
+        // Cargar el archivo de entrada
+        System.out.println("\nHola Profe! :)\n");
 
-                    switch (tipoError(msg)) {
-                        case ")":
-                            detailedMsg = "Error de sintaxis: Se esperaba un paréntesis de cierre.";
-                            break;
-                        case "(":
-                            detailedMsg = "Error de sintaxis: Se esperaba un paréntesis de apertura.";
-                            break;
-                        case ";":
-                            detailedMsg = "Error de sintaxis: Se esperaba un punto y coma.";
-                            break;
-                        case "{":
-                            detailedMsg = "Error de sintaxis: Se esperaba una llave de apertura.";
-                            break;
-                        case "}":
-                            detailedMsg = "Error de sintaxis: Se esperaba una llave de cierre.";
-                            break;
-                        case "otro":
-                            detailedMsg = "Error de sintaxis: Entrada no reconocida " + recognizer.getVocabulary().getDisplayName(((Token) offendingSymbol).getType());
-                            break;
-                        case "/0":
-                            detailedMsg = "Error aritmético: División por cero en la línea " + line;
-                            break;
-                        default:
-                            detailedMsg = errorMsg;
-                            break;
-                    }
+        CharStream input = CharStreams.fromFileName("input/programa.txt");
 
-                    System.out.println(detailedMsg + " En la línea: " + line + ":" + charPositionInLine);
-                }
+        compiladoresLexer lexer = new compiladoresLexer(input);
 
-                private String tipoError(String msg) {
-                    if (msg.contains("')'")) {
-                        return ")";
-                    } else if (msg.contains("'('")) {
-                        return "(";
-                    } else if (msg.contains("';'")) {
-                        return ";";
-                    } else if (msg.contains("'{'")) {
-                        return "{";
-                    } else if (msg.contains("'}'")) {
-                        return "}";
-                    } else if (msg.contains("no viable alternative at input")) {
-                        return "otro";
-                    }
-                    return "nada";
-                }
-            });
-            parser.programa();
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        compiladoresParser parser = new compiladoresParser(tokens);
+
+        Escucha escucha = new Escucha();
+        parser.addParseListener(escucha);
+
+        // Añadir un listener para errores sintácticos
+        parser.removeErrorListeners();
+        EscuchaError errorEscucha = new EscuchaError();
+        parser.addErrorListener(errorEscucha);
+        parser.programa();
     }
 }
+

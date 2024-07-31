@@ -97,13 +97,18 @@ condicion: (NOMBRE | NUMERO | llamadaFuncion) (COMPARE (NOMBRE | NUMERO | llamad
 llaves: LI instrucciones LD;
 
 // Modificación en la regla de declaración para permitir múltiples variables
-declaracion:  tipo NOMBRE
-            |  tipo asignacion
+declaracion:  tipo NOMBRE declaracion_continua
+            |  tipo asignacion declaracion_continua
             ;
 
 declaracion_continua: COMA NOMBRE declaracion_continua
+                    | COMA asignacion declaracion_continua
                     |
                     ;
+
+//version de prueba
+//declaracion: tipo declaracionInicial (COMA declaracionInicial)*;
+//declaracionInicial: NOMBRE | asignacion;
 
 asignacion: NOMBRE IGUAL expresion;
 
