@@ -55,7 +55,7 @@ STRING: 'string';
 NOMBRE: (LETRA | '_')(LETRA | DIGITO | '_')*;
 NUMERO: (DIGITO+ | DIGITO+ PUNTO DIGITO+);
 
-programa: { System.out.println("\n\n -->INICIO<--"); } instrucciones { System.out.println("\n\n -->FIN<--"); };
+programa: instrucciones;
 
 tipo: VOID | DOUBLE | FLOAT | INT | STRING;
 

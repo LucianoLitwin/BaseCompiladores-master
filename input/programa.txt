@@ -1,31 +1,49 @@
+float testFunction() {
+    int v1=1;
+    int v2;
+    return v1;
+}
 
-int v1;
-v1 = 0;
-int v2=0;
+
+int main() {
+
+int x;
+x = 0;
+int y=0;
 
 int dobleDeclaracion;
 int dobleDeclaracion;
 
 
-decimal=20.5;
+float decimal=20.5;
 
-int a;
-if (l < 15)
+if (x < y) {
+    y = y + x;
+} else {
+    x = x - y;
+}
+
+if (noInic < 15)
     a = a + 5;
-
 } else {
     a = a - 5
 }
 
 int i;
-for (i = 0; o < 5; i++) {
+for (i = 0; noInic < 5; i++) {
     a = a + i;
 }
 
-while q > 0) {
+for (i = 0; i < 10; i++) {
+    x = x + i;
+}
+
+while noExist > 0) {
     a = a - 1;
 }
 
 testFunction();
 
 return 0;
+
+}

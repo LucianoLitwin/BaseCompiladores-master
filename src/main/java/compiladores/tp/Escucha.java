@@ -13,6 +13,11 @@ public class Escucha extends compiladoresBaseListener {
     private List<String> semanticWarnings; // Lista de advertencias semánticas
     private int permitoAsignar = 0;
 
+
+    //para funciones
+    private boolean insideFunction = false;
+    private String currentFunctionName = null;
+
     public Escucha() {
         symbolTable = new SymbolTable();  // Inicialización de la tabla de símbolos
         errors = new ArrayList<>();       // Inicialización de la lista de errores
@@ -24,18 +29,10 @@ public class Escucha extends compiladoresBaseListener {
         symbolTable.addContexto();
     }
 
-    @Override
-    public void exitLlaves(compiladoresParser.LlavesContext ctx) {
-        symbolTable.delContexto();
-    }
-
     public List<String> getErrors() {
         return errors;  // Devuelve la lista de errores sintácticos y semánticos
     }
 
-    public List<String> getSemanticWarnings() {
-        return semanticWarnings;  // Devuelve la lista de advertencias semánticas
-    }
 
     public SymbolTable getSymbolTable() {
         return symbolTable;  // Devuelve la tabla de símbolos completa
@@ -115,13 +112,11 @@ public class Escucha extends compiladoresBaseListener {
             String name = ctx.condicion().NOMBRE().toString();
             Type type = symbolTable.getTypeByName(name);
             Symbol symbol = new Symbol(name, type);
-
+            symbolTable.usedSymbol(symbol);
             if(symbolTable.buscarSymbol(symbol) == null) {
                 errors.add("Error de semántica en IF: Comparando una variable inexistente");
             }else if(!symbolTable.buscarSymbol(symbol).isInitialized()){
                 errors.add("Error de semántica en IF: Comparando una variable no inicializada");
-            }else{
-                symbolTable.usedSymbol(symbol);
             }
         }
 
@@ -133,13 +128,11 @@ public class Escucha extends compiladoresBaseListener {
             String name = ctx.expresionFor().condicion().NOMBRE().toString();
             Type type = symbolTable.getTypeByName(name);
             Symbol symbol = new Symbol(name, type);
-
+            symbolTable.usedSymbol(symbol);
             if(symbolTable.buscarSymbol(symbol) == null) {
                 errors.add("Error de semántica en FOR: Comparando una variable inexistente");
             }else if(!symbolTable.buscarSymbol(symbol).isInitialized()){
                 errors.add("Error de semántica en FOR: Comparando una variable no inicializada");
-            }else{
-                symbolTable.usedSymbol(symbol);
             }
         }
     }
@@ -150,24 +143,71 @@ public class Escucha extends compiladoresBaseListener {
             String name = ctx.condicion().NOMBRE().toString();
             Type type = symbolTable.getTypeByName(name);
             Symbol symbol = new Symbol(name, type);
-
+            symbolTable.usedSymbol(symbol);
             if(symbolTable.buscarSymbol(symbol) == null) {
                 errors.add("Error de semántica en WHILE: Comparando una variable inexistente");
             }else if(!symbolTable.buscarSymbol(symbol).isInitialized()){
                 errors.add("Error de semántica en WHILE: Comparando una variable no inicializada");
-            }else{
-                symbolTable.usedSymbol(symbol);
             }
         }
     }
 
-    /*@Override
-    public void exitExpresionAritmetica(compiladoresParser.ExpresionAritmeticaContext ctx) {
-        // Ejemplo de verificación de división por cero
-        if (ctx.operador.getText().equals("/") && ctx.right.getText().equals("0")) {
-            errors.add("Error aritmético: División por cero en la línea " + ctx.start.getLine());
+    @Override
+    public void enterDeclaracionFuncion(compiladoresParser.DeclaracionFuncionContext ctx) {
+        // Marca que estás dentro de una función
+        insideFunction = true;
+    }
+
+    public void exitDeclaracionFuncion(compiladoresParser.DeclaracionFuncionContext ctx) {
+        if (ctx.NOMBRE() != null && ctx.tipo() != null) {
+            String functionName = ctx.NOMBRE().getText();
+            Type returnType = Type.valueOf(ctx.tipo().getText().toUpperCase());
+            currentFunctionName = functionName;
+
+            /*// Para guardar los parametros
+            List<Type> parameterTypes = new ArrayList<>();
+            if (ctx.parametros() != null) {
+                for (compiladoresParser.ParametrosContext paramCtx : ctx.parametros()) {
+                    Type paramType = Type.valueOf(paramCtx.tipo().getText().toUpperCase());
+                    parameterTypes.add(paramType);
+                }
+            }*/
+
+            Function function = new Function(functionName, returnType, null);
+            symbolTable.addSymbol(function);
+
         }
-    }*/
+    }
+
+
+    @Override
+    public void exitMyReturn(compiladoresParser.MyReturnContext ctx) {
+        Function function = symbolTable.getFunctionByName(currentFunctionName);
+        Type typeFunction = function != null ? function.getType() : Type.VOID;
+        Type typeReturn = Type.VOID;
+
+        // Verifico el tipo de la expresión de retorno
+        if (ctx.expresion().termino().factor().NUMERO() != null) {
+            String numeroText = ctx.expresion().termino().factor().NUMERO().getText();
+            if (numeroText.contains(".")) {
+                typeReturn = Type.FLOAT;
+            } else {
+                typeReturn = Type.INT;
+            }
+        } else if (ctx.expresion().termino().factor().NOMBRE() != null) {
+            typeReturn = Type.STRING;
+        }
+
+        // Verificar la presencia de la función y el tipo de retorno
+        if (function == null) {
+            //errors.add("Error: La función '" + currentFunctionName + "' no está declarada.");
+        } else if ("VOID".equals(typeFunction.name()) && ctx.expresion() != null) {
+            errors.add("Error: La función '" + currentFunctionName + "' es de tipo 'void' y no puede devolver un valor.");
+        } else if (ctx.expresion() != null && !typeFunction.equals(typeReturn)) {
+            errors.add("Error: La función '" + currentFunctionName + "' espera un valor de tipo '" + typeFunction.name() + "', pero se está retornando un valor de tipo '" + typeReturn.name() + "'.");
+        }
+    }
+
 
     @Override
     public void exitPrograma(compiladoresParser.ProgramaContext ctx) {
@@ -176,36 +216,33 @@ public class Escucha extends compiladoresBaseListener {
             allIdentificadores.addAll(contexto.getSymbol().values());
         }
 
-        // Verificar si han sido utilizados
+        // Verificar si los identificadores han sido utilizados
         for (Symbol symbol : allIdentificadores) {
-            //System.out.println("Name id: " + symbol.getName());
+            if (symbol instanceof Function) {
+                continue; // Saltar las funciones
+            }
 
+            // Verificar si el identificador ha sido utilizado
             if (!symbol.isUsed()) {
-                //System.out.println("Advertencia semántica: El identificador " + symbol.getName() + " de tipo " + symbol.getType() + " nose utiliza.");
                 semanticWarnings.add("Advertencia semántica: El identificador " + symbol.getName() + " de tipo " + symbol.getType() + " no se utiliza.");
             }
         }
 
+        symbolTable.delContexto();
 
         if(errors.toArray().length>0){
-            System.out.println("\nErrores de Semántica:");
             for (String error : errors) {
-                System.out.println("-" + error);
+                System.err.println("-" + error);
             }
         }
 
         if(semanticWarnings.toArray().length>0){
-            System.out.println("WARNINGS");
+            final String ANSI_RESET = "\u001B[0m";
+            final String ANSI_YELLOW = "\u001B[33m";
             for (String warning : semanticWarnings) {
-                System.out.println("-" + warning);
+                System.out.println(ANSI_YELLOW +"-" + warning+ANSI_RESET);
             }
         }
         symbolTable.delContexto();
     }
-
-
-
-
-
-
 }

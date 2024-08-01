@@ -38,7 +38,7 @@ public class EscuchaError extends BaseErrorListener {
                     break;
             }
 
-            System.out.println(detailedMsg + " En la línea: " + line + ":" + charPositionInLine);
+            System.err.println(detailedMsg + " En la línea: " + line + ":" + charPositionInLine);
         }
 
         private String tipoError(String msg) {

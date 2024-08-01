@@ -46,8 +46,16 @@ public class SymbolTable {
     }
 
     public void usedSymbol(Symbol symbol) {
-        for (int i = contextos.size(); i >=0 ; i--) {
-            symbol.setUsed(true);
+        // Itero sobre los contextos en el orden inverso para encontrar el símbolo en el contexto más cercano (vimos que si no tardaba mucho)
+        for (int i = contextos.size() - 1; i >= 0; i--) {
+            Contexto contexto = contextos.get(i);
+            if (contexto.getSymbol().containsKey(symbol.getName())) {
+                Symbol existingSymbol = contexto.getSymbol().get(symbol.getName());
+                if (existingSymbol != null) {
+                    existingSymbol.setUsed(true);
+                }
+                break; // Salgo del bucle si no lo encuentro
+            }
         }
     }
 
@@ -56,6 +64,18 @@ public class SymbolTable {
             Symbol symbol = contextos.get(i).buscarNameSymbol(name);
             if (symbol != null) {
                 return symbol.getType();
+            }
+        }
+        return null;
+    }
+
+    public Function getFunctionByName(String functionName) {
+        if (functionName != null) {
+            for (int i = contextos.size() - 1; i >= 0; i--) {
+                Function function = contextos.get(i).buscarFunctionByName(functionName);
+                if (function != null) {
+                    return function;
+                }
             }
         }
         return null;

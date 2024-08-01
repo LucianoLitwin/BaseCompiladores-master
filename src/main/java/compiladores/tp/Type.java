@@ -1,6 +1,7 @@
 package compiladores.tp;
 
 public enum Type {
+    VOID,
     INT,
     DOUBLE,
     FLOAT,

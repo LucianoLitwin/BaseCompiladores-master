@@ -11,6 +11,7 @@ public class Visitor extends compiladoresBaseVisitor<Void> {
     private int labelCount = 0;
     private List<String> code = new ArrayList<>();
     private String currentTemp;
+    private SymbolTable symbolTable = new SymbolTable();
 
     private String newTemp() {
         return "t" + (tempCount++);
@@ -22,6 +23,10 @@ public class Visitor extends compiladoresBaseVisitor<Void> {
 
     public List<String> getCode() {
         return code;
+    }
+
+    public SymbolTable getSymbolTable() {
+        return symbolTable;
     }
 
     @Override

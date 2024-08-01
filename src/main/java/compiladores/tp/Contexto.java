@@ -27,6 +27,13 @@ class Contexto {
         return symbols.get(name);
     }
 
+    public Function buscarFunctionByName(String name) {
+        Symbol symbol = symbols.get(name);
+        if (symbol instanceof Function) {
+            return (Function) symbol;
+        }
+        return null;
+    }
 
     public Map<String, Symbol> getSymbol() {
         return symbols;
