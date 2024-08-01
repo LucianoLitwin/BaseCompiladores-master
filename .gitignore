@@ -1,0 +1,9 @@
+*~
+target
+.antlr
+__pycache__
+compiladores*.py
+*.out
+*.class
+*.jar
+.idea/

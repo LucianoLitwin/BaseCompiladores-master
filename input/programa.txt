@@ -1,0 +1,31 @@
+
+int v1;
+v1 = 0;
+int v2=0;
+
+int dobleDeclaracion;
+int dobleDeclaracion;
+
+
+decimal=20.5;
+
+int a;
+if (l < 15)
+    a = a + 5;
+
+} else {
+    a = a - 5
+}
+
+int i;
+for (i = 0; o < 5; i++) {
+    a = a + i;
+}
+
+while q > 0) {
+    a = a - 1;
+}
+
+testFunction();
+
+return 0;
